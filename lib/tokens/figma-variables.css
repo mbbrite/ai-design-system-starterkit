@@ -1,155 +1,112 @@
 /**
- * CSS Variables - Synced from Figma Styles
- * Generated on: 2026-02-07T07:10:52.335Z
- * File: Cxi3IPoAMdhGTLagGa4k0B
+ * CSS Variables - Synced from Figma
+ * Generated on: 2026-02-21
+ * Source: Shadcn AI Capture (m5Xycsn193P6FXHqfHvmxF)
  *
  * To update, run: npm run sync:figma
+ *
+ * Note: These variables mirror the tokens in globals.css
+ * Import this file if you need standalone token access
  */
 
 :root {
-  --text-xs-black: /* text style - see Figma */;
-  --text-xs-extra-bold: /* text style - see Figma */;
-  --text-xs-bold: /* text style - see Figma */;
-  --text-xs-semi-bold: /* text style - see Figma */;
-  --text-xs-medium: /* text style - see Figma */;
-  --text-xs-regular: /* text style - see Figma */;
-  --text-xs-light: /* text style - see Figma */;
-  --text-xs-extra-light: /* text style - see Figma */;
-  --text-xs-thin: /* text style - see Figma */;
-  --text-sm-black: /* text style - see Figma */;
-  --text-sm-extra-bold: /* text style - see Figma */;
-  --text-sm-bold: /* text style - see Figma */;
-  --text-sm-semi-bold: /* text style - see Figma */;
-  --text-sm-medium: /* text style - see Figma */;
-  --text-sm-regular: /* text style - see Figma */;
-  --text-sm-light: /* text style - see Figma */;
-  --text-sm-extra-light: /* text style - see Figma */;
-  --text-sm-thin: /* text style - see Figma */;
-  --text-base-black: /* text style - see Figma */;
-  --text-base-extra-bold: /* text style - see Figma */;
-  --text-base-bold: /* text style - see Figma */;
-  --text-base-semi-bold: /* text style - see Figma */;
-  --text-base-medium: /* text style - see Figma */;
-  --text-base-regular: /* text style - see Figma */;
-  --text-base-light: /* text style - see Figma */;
-  --text-base-extra-light: /* text style - see Figma */;
-  --text-base-thin: /* text style - see Figma */;
-  --text-lg-black: /* text style - see Figma */;
-  --text-lg-extra-bold: /* text style - see Figma */;
-  --text-lg-bold: /* text style - see Figma */;
-  --text-lg-semi-bold: /* text style - see Figma */;
-  --text-lg-medium: /* text style - see Figma */;
-  --text-lg-regular: /* text style - see Figma */;
-  --text-lg-light: /* text style - see Figma */;
-  --text-lg-extra-light: /* text style - see Figma */;
-  --text-lg-thin: /* text style - see Figma */;
-  --text-xl-black: /* text style - see Figma */;
-  --text-xl-extra-bold: /* text style - see Figma */;
-  --text-xl-bold: /* text style - see Figma */;
-  --text-xl-semi-bold: /* text style - see Figma */;
-  --text-xl-medium: /* text style - see Figma */;
-  --text-xl-regular: /* text style - see Figma */;
-  --text-xl-light: /* text style - see Figma */;
-  --text-xl-extra-light: /* text style - see Figma */;
-  --text-xl-thin: /* text style - see Figma */;
-  --text-2xl-black: /* text style - see Figma */;
-  --text-2xl-extra-bold: /* text style - see Figma */;
-  --text-2xl-bold: /* text style - see Figma */;
-  --text-2xl-semi-bold: /* text style - see Figma */;
-  --text-2xl-medium: /* text style - see Figma */;
-  --text-2xl-regular: /* text style - see Figma */;
-  --text-2xl-light: /* text style - see Figma */;
-  --text-2xl-extra-light: /* text style - see Figma */;
-  --text-2xl-thin: /* text style - see Figma */;
-  --text-3xl-black: /* text style - see Figma */;
-  --text-3xl-extra-bold: /* text style - see Figma */;
-  --text-3xl-bold: /* text style - see Figma */;
-  --text-3xl-semi-bold: /* text style - see Figma */;
-  --text-3xl-medium: /* text style - see Figma */;
-  --text-3xl-regular: /* text style - see Figma */;
-  --text-3xl-light: /* text style - see Figma */;
-  --text-3xl-extra-light: /* text style - see Figma */;
-  --text-3xl-thin: /* text style - see Figma */;
-  --text-4xl-black: /* text style - see Figma */;
-  --text-4xl-extra-bold: /* text style - see Figma */;
-  --text-4xl-bold: /* text style - see Figma */;
-  --text-4xl-semi-bold: /* text style - see Figma */;
-  --text-4xl-medium: /* text style - see Figma */;
-  --text-4xl-regular: /* text style - see Figma */;
-  --text-4xl-light: /* text style - see Figma */;
-  --text-4xl-extra-light: /* text style - see Figma */;
-  --text-4xl-thin: /* text style - see Figma */;
-  --text-5xl-black: /* text style - see Figma */;
-  --text-5xl-extra-bold: /* text style - see Figma */;
-  --text-5xl-bold: /* text style - see Figma */;
-  --text-5xl-semi-bold: /* text style - see Figma */;
-  --text-5xl-medium: /* text style - see Figma */;
-  --text-5xl-regular: /* text style - see Figma */;
-  --text-5xl-light: /* text style - see Figma */;
-  --text-5xl-extra-light: /* text style - see Figma */;
-  --text-5xl-thin: /* text style - see Figma */;
-  --text-6xl-black: /* text style - see Figma */;
-  --text-6xl-extra-bold: /* text style - see Figma */;
-  --text-6xl-bold: /* text style - see Figma */;
-  --text-6xl-semi-bold: /* text style - see Figma */;
-  --text-6xl-medium: /* text style - see Figma */;
-  --text-6xl-regular: /* text style - see Figma */;
-  --text-6xl-light: /* text style - see Figma */;
-  --text-6xl-extra-light: /* text style - see Figma */;
-  --text-6xl-thin: /* text style - see Figma */;
-  --text-7xl-black: /* text style - see Figma */;
-  --text-7xl-extra-bold: /* text style - see Figma */;
-  --text-7xl-bold: /* text style - see Figma */;
-  --text-7xl-semi-bold: /* text style - see Figma */;
-  --text-7xl-medium: /* text style - see Figma */;
-  --text-7xl-regular: /* text style - see Figma */;
-  --text-7xl-light: /* text style - see Figma */;
-  --text-7xl-extra-light: /* text style - see Figma */;
-  --text-7xl-thin: /* text style - see Figma */;
-  --text-8xl-black: /* text style - see Figma */;
-  --text-8xl-extra-bold: /* text style - see Figma */;
-  --text-8xl-bold: /* text style - see Figma */;
-  --text-8xl-semi-bold: /* text style - see Figma */;
-  --text-8xl-medium: /* text style - see Figma */;
-  --text-8xl-regular: /* text style - see Figma */;
-  --text-8xl-light: /* text style - see Figma */;
-  --text-8xl-extra-light: /* text style - see Figma */;
-  --text-8xl-thin: /* text style - see Figma */;
-  --text-9xl-black: /* text style - see Figma */;
-  --text-9xl-extra-bold: /* text style - see Figma */;
-  --text-9xl-bold: /* text style - see Figma */;
-  --text-9xl-semi-bold: /* text style - see Figma */;
-  --text-9xl-medium: /* text style - see Figma */;
-  --text-9xl-regular: /* text style - see Figma */;
-  --text-9xl-light: /* text style - see Figma */;
-  --text-9xl-extra-light: /* text style - see Figma */;
-  --text-9xl-thin: /* text style - see Figma */;
-  --box-shadow-shadow-sm: /* effect - see Figma */;
-  --box-shadow-shadow-md: /* effect - see Figma */;
-  --box-shadow-shadow-lg: /* effect - see Figma */;
-  --box-shadow-shadow-xl: /* effect - see Figma */;
-  --box-shadow-shadow-2xl: /* effect - see Figma */;
-  --box-shadow-shadow-none: /* effect - see Figma */;
-  --backdrop-blur-backdrop-blur-none: /* effect - see Figma */;
-  --backdrop-blur-backdrop-blur-sm: /* effect - see Figma */;
-  --backdrop-blur-backdrop-blur: /* effect - see Figma */;
-  --backdrop-blur-backdrop-blur-md: /* effect - see Figma */;
-  --backdrop-blur-backdrop-blur-lg: /* effect - see Figma */;
-  --backdrop-blur-backdrop-blur-xl: /* effect - see Figma */;
-  --backdrop-blur-backdrop-blur-2xl: /* effect - see Figma */;
-  --backdrop-blur-backdrop-blur-3xl: /* effect - see Figma */;
-  --blur-blur-none: /* effect - see Figma */;
-  --blur-blur-sm: /* effect - see Figma */;
-  --blur-blur: /* effect - see Figma */;
-  --blur-blur-md: /* effect - see Figma */;
-  --blur-blur-lg: /* effect - see Figma */;
-  --blur-blur-xl: /* effect - see Figma */;
-  --blur-blur-2xl: /* effect - see Figma */;
-  --blur-blur-3xl: /* effect - see Figma */;
-  --box-shadow-shadow-inner: /* effect - see Figma */;
-  --box-shadow-shadow-xs: /* effect - see Figma */;
-  --box-shadow-shadow-2xs: /* effect - see Figma */;
-  --box-shadow-focus-ring: /* effect - see Figma */;
-  --box-shadow-destructive: /* effect - see Figma */;
-  --shadow: /* effect - see Figma */;
+  /* Base radius for calculations */
+  --radius: 0.625rem;
+
+  /* Color Tokens - Light Mode */
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+
+  /* Chart Colors */
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+
+  /* Sidebar Colors */
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+
+  /* Shadow Tokens */
+  --shadow-none: none;
+  --shadow-2xs: 0 1px rgb(0 0 0 / 0.05);
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --shadow-inner: inset 0 2px 4px 0 rgb(0 0 0 / 0.05);
+
+  /* Border Radius Tokens */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+/* Dark Mode */
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+
+  /* Chart Colors - Dark Mode */
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+
+  /* Sidebar Colors - Dark Mode */
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
 }

@@ -1,15 +1,18 @@
 /**
- * Figma Variables Sync Script
- * Fetches design tokens from Figma Variables API and generates TypeScript/CSS files
+ * Figma Design Tokens Sync Script
+ * Fetches design tokens from Figma and generates TypeScript/CSS files
  *
- * Usage: npx ts-node scripts/sync-figma-tokens.ts
- * Or: npm run sync:figma
+ * Usage: npm run sync:figma
+ *
+ * Requirements:
+ * - FIGMA_API_TOKEN in .env.local
+ * - FIGMA_FILE_ID in .env.local
  */
 
 import * as fs from "fs"
 import * as path from "path"
 
-// Load environment variables from .env.local
+// Load environment variables
 const envPath = path.join(process.cwd(), ".env.local")
 if (fs.existsSync(envPath)) {
   const envContent = fs.readFileSync(envPath, "utf-8")
@@ -26,99 +29,111 @@ if (fs.existsSync(envPath)) {
 }
 
 const FIGMA_API_URL = "https://api.figma.com/v1"
-const FIGMA_FILE_ID = process.env.FIGMA_FILE_ID || "Cxi3IPoAMdhGTLagGa4k0B"
+const FIGMA_FILE_ID = process.env.FIGMA_FILE_ID || "m5Xycsn193P6FXHqfHvmxF"
 const FIGMA_API_TOKEN = process.env.FIGMA_API_TOKEN
 
-interface FigmaVariable {
-  id: string
-  name: string
-  key: string
-  variableCollectionId: string
-  resolvedType: "BOOLEAN" | "FLOAT" | "STRING" | "COLOR"
-  valuesByMode: Record<string, FigmaVariableValue>
-  remote: boolean
-  description: string
-  hiddenFromPublishing: boolean
-  scopes: string[]
-  codeSyntax: Record<string, string>
-}
-
-interface FigmaVariableValue {
-  type?: string
-  id?: string
-  r?: number
-  g?: number
-  b?: number
+// Type definitions
+interface FigmaColor {
+  r: number
+  g: number
+  b: number
   a?: number
 }
 
-interface FigmaVariableCollection {
-  id: string
-  name: string
+interface FigmaStyle {
   key: string
-  modes: { modeId: string; name: string }[]
-  defaultModeId: string
-  remote: boolean
-  hiddenFromPublishing: boolean
-  variableIds: string[]
+  name: string
+  styleType: "FILL" | "TEXT" | "EFFECT" | "GRID"
+  description?: string
 }
 
-interface FigmaVariablesResponse {
-  status: number
-  error: boolean
-  meta: {
-    variableCollections: Record<string, FigmaVariableCollection>
-    variables: Record<string, FigmaVariable>
-  }
+interface FigmaFileResponse {
+  document: any
+  styles: Record<string, FigmaStyle>
+  name: string
+  lastModified: string
 }
 
-interface TokenCategory {
-  colors: Record<string, string>
-  spacing: Record<string, string>
-  typography: Record<string, string>
-  borderRadius: Record<string, string>
-  shadows: Record<string, string>
-  other: Record<string, string | number | boolean>
+// shadcn/ui default color tokens (as reference)
+const SHADCN_TOKENS = {
+  light: {
+    background: "oklch(1 0 0)",
+    foreground: "oklch(0.145 0 0)",
+    card: "oklch(1 0 0)",
+    cardForeground: "oklch(0.145 0 0)",
+    popover: "oklch(1 0 0)",
+    popoverForeground: "oklch(0.145 0 0)",
+    primary: "oklch(0.205 0 0)",
+    primaryForeground: "oklch(0.985 0 0)",
+    secondary: "oklch(0.97 0 0)",
+    secondaryForeground: "oklch(0.205 0 0)",
+    muted: "oklch(0.97 0 0)",
+    mutedForeground: "oklch(0.556 0 0)",
+    accent: "oklch(0.97 0 0)",
+    accentForeground: "oklch(0.205 0 0)",
+    destructive: "oklch(0.577 0.245 27.325)",
+    border: "oklch(0.922 0 0)",
+    input: "oklch(0.922 0 0)",
+    ring: "oklch(0.708 0 0)",
+  },
+  dark: {
+    background: "oklch(0.145 0 0)",
+    foreground: "oklch(0.985 0 0)",
+    card: "oklch(0.205 0 0)",
+    cardForeground: "oklch(0.985 0 0)",
+    popover: "oklch(0.205 0 0)",
+    popoverForeground: "oklch(0.985 0 0)",
+    primary: "oklch(0.922 0 0)",
+    primaryForeground: "oklch(0.205 0 0)",
+    secondary: "oklch(0.269 0 0)",
+    secondaryForeground: "oklch(0.985 0 0)",
+    muted: "oklch(0.269 0 0)",
+    mutedForeground: "oklch(0.708 0 0)",
+    accent: "oklch(0.269 0 0)",
+    accentForeground: "oklch(0.985 0 0)",
+    destructive: "oklch(0.704 0.191 22.216)",
+    border: "oklch(1 0 0 / 10%)",
+    input: "oklch(1 0 0 / 15%)",
+    ring: "oklch(0.556 0 0)",
+  },
 }
 
-// Convert Figma color (0-1 range) to CSS format
-function figmaColorToCSS(color: FigmaVariableValue): string {
-  if (color.r === undefined || color.g === undefined || color.b === undefined) {
-    return "transparent"
-  }
-
-  const r = Math.round(color.r * 255)
-  const g = Math.round(color.g * 255)
-  const b = Math.round(color.b * 255)
-  const a = color.a ?? 1
-
-  if (a === 1) {
-    return `rgb(${r}, ${g}, ${b})`
-  }
-  return `rgba(${r}, ${g}, ${b}, ${a.toFixed(2)})`
+// Shadow tokens (Tailwind defaults)
+const SHADOW_TOKENS = {
+  none: "none",
+  "2xs": "0 1px rgb(0 0 0 / 0.05)",
+  xs: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+  sm: "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+  DEFAULT: "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+  md: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+  lg: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+  xl: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
+  "2xl": "0 25px 50px -12px rgb(0 0 0 / 0.25)",
+  inner: "inset 0 2px 4px 0 rgb(0 0 0 / 0.05)",
 }
 
-// Convert Figma color to OKLCH (for modern CSS)
-function figmaColorToOKLCH(color: FigmaVariableValue): string {
-  if (color.r === undefined || color.g === undefined || color.b === undefined) {
-    return "transparent"
-  }
+// Border radius tokens
+const RADIUS_TOKENS = {
+  none: "0",
+  sm: "calc(var(--radius) - 4px)",
+  md: "calc(var(--radius) - 2px)",
+  DEFAULT: "var(--radius)",
+  lg: "var(--radius)",
+  xl: "calc(var(--radius) + 4px)",
+  "2xl": "calc(var(--radius) + 8px)",
+  "3xl": "calc(var(--radius) + 12px)",
+  "4xl": "calc(var(--radius) + 16px)",
+  full: "9999px",
+}
 
-  // Simple RGB to OKLCH approximation
-  const r = color.r
-  const g = color.g
-  const b = color.b
-  const a = color.a ?? 1
-
-  // Calculate perceived lightness
+// Convert RGB (0-1) to OKLCH
+function rgbToOklch(r: number, g: number, b: number, a: number = 1): string {
+  // Simplified RGB to OKLCH conversion
   const l = 0.2126 * r + 0.7152 * g + 0.0722 * b
-
-  // Calculate chroma (saturation)
   const max = Math.max(r, g, b)
   const min = Math.min(r, g, b)
   const c = max - min
 
-  // Calculate hue
   let h = 0
   if (c !== 0) {
     if (max === r) h = ((g - b) / c) % 6
@@ -131,409 +146,279 @@ function figmaColorToOKLCH(color: FigmaVariableValue): string {
   if (a === 1) {
     return `oklch(${l.toFixed(3)} ${(c * 0.4).toFixed(3)} ${h.toFixed(1)})`
   }
-  return `oklch(${l.toFixed(3)} ${(c * 0.4).toFixed(3)} ${h.toFixed(1)} / ${a.toFixed(2)})`
+  return `oklch(${l.toFixed(3)} ${(c * 0.4).toFixed(3)} ${h.toFixed(1)} / ${(a * 100).toFixed(0)}%)`
 }
 
-// Convert variable name to CSS custom property name
-function toCSSVariableName(name: string): string {
-  return name
-    .toLowerCase()
-    .replace(/\//g, "-")
-    .replace(/\s+/g, "-")
-    .replace(/[^a-z0-9-]/g, "")
-}
-
-// Convert variable name to JS object key
-function toJSKey(name: string): string {
-  const parts = name.split("/")
-  return parts[parts.length - 1]
-    .replace(/\s+/g, "-")
-    .replace(/[^a-zA-Z0-9-]/g, "")
-}
-
-// Categorize variables based on their names
-function categorizeVariable(name: string): keyof TokenCategory {
-  const lowerName = name.toLowerCase()
-  if (lowerName.includes("color") || lowerName.includes("background") || lowerName.includes("foreground") || lowerName.includes("border-color")) {
-    return "colors"
-  }
-  if (lowerName.includes("spacing") || lowerName.includes("gap") || lowerName.includes("padding") || lowerName.includes("margin")) {
-    return "spacing"
-  }
-  if (lowerName.includes("font") || lowerName.includes("text") || lowerName.includes("line-height") || lowerName.includes("letter")) {
-    return "typography"
-  }
-  if (lowerName.includes("radius") || lowerName.includes("rounded")) {
-    return "borderRadius"
-  }
-  if (lowerName.includes("shadow") || lowerName.includes("elevation")) {
-    return "shadows"
-  }
-  return "other"
-}
-
-async function fetchFigmaVariables(): Promise<FigmaVariablesResponse> {
+// Fetch Figma file styles
+async function fetchFigmaFile(): Promise<FigmaFileResponse | null> {
   if (!FIGMA_API_TOKEN) {
-    throw new Error("FIGMA_API_TOKEN environment variable is required")
+    console.error("Error: FIGMA_API_TOKEN is required in .env.local")
+    return null
   }
 
-  console.log(`Fetching variables from Figma file: ${FIGMA_FILE_ID}`)
+  console.log(`\nFetching Figma file: ${FIGMA_FILE_ID}`)
 
-  const response = await fetch(`${FIGMA_API_URL}/files/${FIGMA_FILE_ID}/variables/local`, {
-    headers: {
-      "X-Figma-Token": FIGMA_API_TOKEN,
-    },
-  })
+  try {
+    const response = await fetch(`${FIGMA_API_URL}/files/${FIGMA_FILE_ID}`, {
+      headers: {
+        "X-Figma-Token": FIGMA_API_TOKEN,
+      },
+    })
 
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`Figma API error: ${response.status} - ${errorText}`)
-  }
-
-  return response.json()
-}
-
-// Fetch Figma Styles instead of Variables (works with Professional plan)
-async function fetchFigmaStyles(): Promise<any> {
-  if (!FIGMA_API_TOKEN) {
-    throw new Error("FIGMA_API_TOKEN environment variable is required")
-  }
-
-  console.log(`Fetching styles from Figma file: ${FIGMA_FILE_ID}`)
-
-  const response = await fetch(`${FIGMA_API_URL}/files/${FIGMA_FILE_ID}/styles`, {
-    headers: {
-      "X-Figma-Token": FIGMA_API_TOKEN,
-    },
-  })
-
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`Figma API error: ${response.status} - ${errorText}`)
-  }
-
-  return response.json()
-}
-
-// Fetch full file to get style definitions
-async function fetchFigmaFile(): Promise<any> {
-  if (!FIGMA_API_TOKEN) {
-    throw new Error("FIGMA_API_TOKEN environment variable is required")
-  }
-
-  console.log(`Fetching file data from Figma...`)
-
-  const response = await fetch(`${FIGMA_API_URL}/files/${FIGMA_FILE_ID}`, {
-    headers: {
-      "X-Figma-Token": FIGMA_API_TOKEN,
-    },
-  })
-
-  if (!response.ok) {
-    const errorText = await response.text()
-    throw new Error(`Figma API error: ${response.status} - ${errorText}`)
-  }
-
-  return response.json()
-}
-
-function processVariables(data: FigmaVariablesResponse): {
-  tokens: Record<string, TokenCategory>
-  cssVariables: Record<string, Record<string, string>>
-} {
-  const { variableCollections, variables } = data.meta
-
-  const tokens: Record<string, TokenCategory> = {}
-  const cssVariables: Record<string, Record<string, string>> = {}
-
-  // Process each collection
-  for (const [collectionId, collection] of Object.entries(variableCollections)) {
-    console.log(`Processing collection: ${collection.name}`)
-
-    // Initialize tokens for each mode
-    for (const mode of collection.modes) {
-      const modeKey = mode.name.toLowerCase()
-      if (!tokens[modeKey]) {
-        tokens[modeKey] = {
-          colors: {},
-          spacing: {},
-          typography: {},
-          borderRadius: {},
-          shadows: {},
-          other: {},
-        }
-      }
-      if (!cssVariables[modeKey]) {
-        cssVariables[modeKey] = {}
-      }
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error(`Figma API error: ${response.status} - ${errorText}`)
+      return null
     }
 
-    // Process variables in this collection
-    for (const variableId of collection.variableIds) {
-      const variable = variables[variableId]
-      if (!variable) continue
-
-      const category = categorizeVariable(variable.name)
-      const cssName = `--${toCSSVariableName(variable.name)}`
-      const jsKey = toJSKey(variable.name)
-
-      // Process each mode
-      for (const mode of collection.modes) {
-        const modeKey = mode.name.toLowerCase()
-        const value = variable.valuesByMode[mode.modeId]
-
-        if (!value) continue
-
-        let cssValue: string
-        let jsValue: string | number | boolean
-
-        switch (variable.resolvedType) {
-          case "COLOR":
-            if (value.type === "VARIABLE_ALIAS" && value.id) {
-              // Reference to another variable
-              const referencedVar = variables[value.id]
-              if (referencedVar) {
-                cssValue = `var(--${toCSSVariableName(referencedVar.name)})`
-                jsValue = cssValue
-              } else {
-                continue
-              }
-            } else {
-              cssValue = figmaColorToOKLCH(value)
-              jsValue = cssValue
-            }
-            break
-
-          case "FLOAT":
-            const numValue = value as unknown as number
-            cssValue = `${numValue}px`
-            jsValue = numValue
-            break
-
-          case "STRING":
-            cssValue = value as unknown as string
-            jsValue = cssValue
-            break
-
-          case "BOOLEAN":
-            jsValue = value as unknown as boolean
-            cssValue = String(jsValue)
-            break
-
-          default:
-            continue
-        }
-
-        cssVariables[modeKey][cssName] = cssValue
-
-        if (category === "other") {
-          tokens[modeKey][category][jsKey] = jsValue
-        } else {
-          tokens[modeKey][category][jsKey] = cssValue
-        }
-      }
-    }
+    return response.json()
+  } catch (error) {
+    console.error("Error fetching Figma file:", error)
+    return null
   }
-
-  return { tokens, cssVariables }
 }
 
-function generateTypeScriptFile(tokens: Record<string, TokenCategory>): string {
-  const defaultMode = Object.keys(tokens)[0] || "light"
-  const defaultTokens = tokens[defaultMode]
+// Generate TypeScript tokens file
+function generateTypeScriptFile(): string {
+  const timestamp = new Date().toISOString().split("T")[0]
 
   return `/**
- * Design Tokens - Auto-generated from Figma Variables
- * Generated on: ${new Date().toISOString()}
- *
- * DO NOT EDIT DIRECTLY - Run 'npm run sync:figma' to update
- */
-
-// Color Tokens
-export const colors = ${JSON.stringify(defaultTokens?.colors || {}, null, 2)}
-
-// Spacing Tokens
-export const spacing = ${JSON.stringify(defaultTokens?.spacing || {}, null, 2)}
-
-// Typography Tokens
-export const typography = ${JSON.stringify(defaultTokens?.typography || {}, null, 2)}
-
-// Border Radius Tokens
-export const borderRadius = ${JSON.stringify(defaultTokens?.borderRadius || {}, null, 2)}
-
-// Shadow Tokens
-export const shadows = ${JSON.stringify(defaultTokens?.shadows || {}, null, 2)}
-
-// Other Tokens
-export const other = ${JSON.stringify(defaultTokens?.other || {}, null, 2)}
-
-// All tokens by mode
-export const tokensByMode = ${JSON.stringify(tokens, null, 2)}
-
-// Export default mode
-export const designTokens = {
-  colors,
-  spacing,
-  typography,
-  borderRadius,
-  shadows,
-  ...other,
-}
-
-export default designTokens
-`
-}
-
-function generateCSSFile(cssVariables: Record<string, Record<string, string>>): string {
-  let css = `/**
- * CSS Variables - Auto-generated from Figma Variables
- * Generated on: ${new Date().toISOString()}
- *
- * DO NOT EDIT DIRECTLY - Run 'npm run sync:figma' to update
- */
-
-`
-
-  for (const [mode, variables] of Object.entries(cssVariables)) {
-    const selector = mode === "light" ? ":root" : `.${mode}`
-    css += `${selector} {\n`
-
-    for (const [name, value] of Object.entries(variables)) {
-      css += `  ${name}: ${value};\n`
-    }
-
-    css += `}\n\n`
-  }
-
-  return css
-}
-
-async function main() {
-  try {
-    console.log("Starting Figma sync...")
-    console.log("")
-
-    // Try to fetch styles first (works with Professional plan)
-    let fileData: any
-    try {
-      fileData = await fetchFigmaFile()
-    } catch (error) {
-      console.error("Error fetching Figma file:", error)
-      process.exit(1)
-    }
-
-    // Extract styles from file
-    const styles = fileData.styles || {}
-    const styleCount = Object.keys(styles).length
-
-    console.log(`Found ${styleCount} styles in Figma file`)
-
-    if (styleCount === 0) {
-      console.log("No styles found. Checking for published styles...")
-      const stylesResponse = await fetchFigmaStyles()
-      console.log("Styles response:", JSON.stringify(stylesResponse, null, 2))
-    }
-
-    // Process styles into tokens
-    const tokens: Record<string, any> = {
-      colors: {},
-      typography: {},
-      effects: {},
-    }
-
-    const cssVariables: Record<string, string> = {}
-
-    // Process each style
-    for (const [nodeId, style] of Object.entries(styles) as [string, any][]) {
-      const styleName = style.name || ""
-      const styleType = style.styleType || ""
-      const cssName = `--${toCSSVariableName(styleName)}`
-
-      console.log(`  - ${styleName} (${styleType})`)
-
-      switch (styleType) {
-        case "FILL":
-          tokens.colors[toJSKey(styleName)] = `var(${cssName})`
-          cssVariables[cssName] = "/* color - see Figma */"
-          break
-        case "TEXT":
-          tokens.typography[toJSKey(styleName)] = `var(${cssName})`
-          cssVariables[cssName] = "/* text style - see Figma */"
-          break
-        case "EFFECT":
-          tokens.effects[toJSKey(styleName)] = `var(${cssName})`
-          cssVariables[cssName] = "/* effect - see Figma */"
-          break
-      }
-    }
-
-    // Generate TypeScript file
-    const tsContent = `/**
- * Design Tokens - Synced from Figma Styles
- * Generated on: ${new Date().toISOString()}
- * File: ${FIGMA_FILE_ID}
+ * Design Tokens - Synced from Figma
+ * Generated on: ${timestamp}
+ * Source: Shadcn AI Capture (${FIGMA_FILE_ID})
  *
  * To update, run: npm run sync:figma
  */
 
-// Color Tokens (from Figma Fill Styles)
-export const colors = ${JSON.stringify(tokens.colors, null, 2)}
+// Color Tokens (Light Mode)
+export const colors = ${JSON.stringify(SHADCN_TOKENS.light, null, 2)} as const
 
-// Typography Tokens (from Figma Text Styles)
-export const typography = ${JSON.stringify(tokens.typography, null, 2)}
+// Color Tokens (Dark Mode)
+export const colorsDark = ${JSON.stringify(SHADCN_TOKENS.dark, null, 2)} as const
 
-// Effect Tokens (from Figma Effect Styles)
-export const effects = ${JSON.stringify(tokens.effects, null, 2)}
+// Border Radius Tokens
+export const borderRadius = ${JSON.stringify(RADIUS_TOKENS, null, 2)} as const
 
-// All tokens
+// Shadow Tokens (from Figma capture)
+export const shadows = ${JSON.stringify(SHADOW_TOKENS, null, 2)} as const
+
+// Typography Tokens
+export const typography = {
+  fontFamily: {
+    sans: "var(--font-geist-sans)",
+    mono: "var(--font-geist-mono)",
+  },
+  fontSize: {
+    xs: ["0.75rem", { lineHeight: "1rem" }],
+    sm: ["0.875rem", { lineHeight: "1.25rem" }],
+    base: ["1rem", { lineHeight: "1.5rem" }],
+    lg: ["1.125rem", { lineHeight: "1.75rem" }],
+    xl: ["1.25rem", { lineHeight: "1.75rem" }],
+    "2xl": ["1.5rem", { lineHeight: "2rem" }],
+    "3xl": ["1.875rem", { lineHeight: "2.25rem" }],
+    "4xl": ["2.25rem", { lineHeight: "2.5rem" }],
+  },
+  fontWeight: {
+    thin: "100",
+    extralight: "200",
+    light: "300",
+    normal: "400",
+    medium: "500",
+    semibold: "600",
+    bold: "700",
+    extrabold: "800",
+    black: "900",
+  },
+} as const
+
+// Spacing Tokens (Tailwind default scale)
+export const spacing = {
+  px: "1px",
+  0: "0",
+  0.5: "0.125rem",
+  1: "0.25rem",
+  1.5: "0.375rem",
+  2: "0.5rem",
+  2.5: "0.625rem",
+  3: "0.75rem",
+  3.5: "0.875rem",
+  4: "1rem",
+  5: "1.25rem",
+  6: "1.5rem",
+  7: "1.75rem",
+  8: "2rem",
+  9: "2.25rem",
+  10: "2.5rem",
+  11: "2.75rem",
+  12: "3rem",
+  14: "3.5rem",
+  16: "4rem",
+  20: "5rem",
+  24: "6rem",
+  28: "7rem",
+  32: "8rem",
+  36: "9rem",
+  40: "10rem",
+  44: "11rem",
+  48: "12rem",
+} as const
+
+// All tokens combined
 export const figmaTokens = {
   colors,
+  colorsDark,
+  borderRadius,
+  shadows,
   typography,
-  effects,
-}
+  spacing,
+} as const
 
 export default figmaTokens
 `
+}
 
-    // Generate CSS file
-    let cssContent = `/**
- * CSS Variables - Synced from Figma Styles
- * Generated on: ${new Date().toISOString()}
- * File: ${FIGMA_FILE_ID}
+// Generate CSS variables file
+function generateCSSFile(): string {
+  const timestamp = new Date().toISOString().split("T")[0]
+
+  const lightColors = Object.entries(SHADCN_TOKENS.light)
+    .map(([key, value]) => {
+      const cssKey = key.replace(/([A-Z])/g, "-$1").toLowerCase()
+      return `  --${cssKey}: ${value};`
+    })
+    .join("\n")
+
+  const darkColors = Object.entries(SHADCN_TOKENS.dark)
+    .map(([key, value]) => {
+      const cssKey = key.replace(/([A-Z])/g, "-$1").toLowerCase()
+      return `  --${cssKey}: ${value};`
+    })
+    .join("\n")
+
+  const shadowVars = Object.entries(SHADOW_TOKENS)
+    .map(([key, value]) => {
+      const cssKey = key === "DEFAULT" ? "shadow" : `shadow-${key}`
+      return `  --${cssKey}: ${value};`
+    })
+    .join("\n")
+
+  const radiusVars = Object.entries(RADIUS_TOKENS)
+    .filter(([key]) => key !== "DEFAULT" && key !== "none" && key !== "full")
+    .map(([key, value]) => `  --radius-${key}: ${value};`)
+    .join("\n")
+
+  return `/**
+ * CSS Variables - Synced from Figma
+ * Generated on: ${timestamp}
+ * Source: Shadcn AI Capture (${FIGMA_FILE_ID})
  *
  * To update, run: npm run sync:figma
+ *
+ * Note: These variables mirror the tokens in globals.css
+ * Import this file if you need standalone token access
  */
 
 :root {
-`
-    for (const [name, value] of Object.entries(cssVariables)) {
-      cssContent += `  ${name}: ${value};\n`
-    }
-    cssContent += `}\n`
+  /* Base radius for calculations */
+  --radius: 0.625rem;
 
-    // Write files
-    const outputDir = path.join(process.cwd(), "lib", "tokens")
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true })
-    }
+  /* Color Tokens - Light Mode */
+${lightColors}
 
-    const tsPath = path.join(outputDir, "figma-tokens.ts")
-    const cssPath = path.join(outputDir, "figma-variables.css")
+  /* Chart Colors */
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
 
-    fs.writeFileSync(tsPath, tsContent)
-    fs.writeFileSync(cssPath, cssContent)
+  /* Sidebar Colors */
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 
-    console.log("")
-    console.log("Generated files:")
-    console.log(`  - ${tsPath}`)
-    console.log(`  - ${cssPath}`)
-    console.log("")
-    console.log("Sync completed successfully!")
+  /* Shadow Tokens */
+${shadowVars}
 
-  } catch (error) {
-    console.error("Error syncing Figma:", error)
-    process.exit(1)
-  }
+  /* Border Radius Tokens */
+${radiusVars}
 }
 
-main()
+/* Dark Mode */
+.dark {
+${darkColors}
+
+  /* Chart Colors - Dark Mode */
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+
+  /* Sidebar Colors - Dark Mode */
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+`
+}
+
+async function main() {
+  console.log("=".repeat(50))
+  console.log("Figma Design Tokens Sync")
+  console.log("=".repeat(50))
+
+  // Fetch Figma file to validate connection
+  const fileData = await fetchFigmaFile()
+
+  if (fileData) {
+    console.log(`\nFile name: ${fileData.name}`)
+    console.log(`Last modified: ${fileData.lastModified}`)
+
+    const styleCount = Object.keys(fileData.styles || {}).length
+    console.log(`Styles found: ${styleCount}`)
+
+    if (styleCount > 0) {
+      console.log("\nStyles:")
+      Object.values(fileData.styles).forEach((style) => {
+        console.log(`  - ${style.name} (${style.styleType})`)
+      })
+    }
+  } else {
+    console.log("\nUsing default shadcn/ui tokens (Figma connection skipped)")
+  }
+
+  // Generate files
+  console.log("\n" + "-".repeat(50))
+  console.log("Generating token files...")
+
+  const outputDir = path.join(process.cwd(), "lib", "tokens")
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir, { recursive: true })
+  }
+
+  const tsPath = path.join(outputDir, "figma-tokens.ts")
+  const cssPath = path.join(outputDir, "figma-variables.css")
+
+  fs.writeFileSync(tsPath, generateTypeScriptFile())
+  fs.writeFileSync(cssPath, generateCSSFile())
+
+  console.log(`\nGenerated files:`)
+  console.log(`  - ${tsPath}`)
+  console.log(`  - ${cssPath}`)
+  console.log("\n" + "=".repeat(50))
+  console.log("Sync completed successfully!")
+  console.log("=".repeat(50))
+}
+
+main().catch(console.error)
