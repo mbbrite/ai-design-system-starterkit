@@ -111,6 +111,14 @@ const config = {
         '2xl': '4rem',
         '3xl': '6rem',
       },
+      width: {
+        'sidebar-collapsed': '48px',
+        'sidebar-expanded': '160px',
+      },
+      minWidth: {
+        'sidebar-collapsed': '48px',
+        'sidebar-expanded': '160px',
+      },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
@@ -123,6 +131,12 @@ const config = {
         'slide-in-from-right': 'slide-in-from-right 0.3s ease-out',
         'slide-out-to-left': 'slide-out-to-left 0.3s ease-in',
         'slide-out-to-right': 'slide-out-to-right 0.3s ease-in',
+        // From design-token-plugin
+        'slide-in-up': 'slide-in-up 200ms ease-out',
+        'scale-in': 'scale-in 150ms ease-out',
+        'skeleton-pulse': 'skeleton-pulse 1.5s ease-in-out infinite',
+        'toast-in': 'toast-in 200ms ease-out',
+        'toast-out': 'toast-out 150ms ease-in forwards',
       },
       keyframes: {
         'accordion-down': {
@@ -192,6 +206,27 @@ const config = {
             opacity: '0',
             transform: 'translateX(10px)',
           },
+        },
+        // From design-token-plugin
+        'slide-in-up': {
+          '0%': { opacity: '0', transform: 'translateY(6px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        'scale-in': {
+          '0%': { opacity: '0', transform: 'scale(0.95)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
+        'skeleton-pulse': {
+          '0%, 100%': { opacity: '0.4' },
+          '50%': { opacity: '1' },
+        },
+        'toast-in': {
+          '0%': { opacity: '0', transform: 'translateY(-8px) scale(0.96)' },
+          '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
+        'toast-out': {
+          '0%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+          '100%': { opacity: '0', transform: 'translateY(-8px) scale(0.96)' },
         },
       },
       transitionTimingFunction: {
